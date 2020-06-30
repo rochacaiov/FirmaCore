@@ -1,0 +1,12 @@
+name: FirmaCore
+version: 1.0.0
+main: br.firmacore.Main
+author: F1rmeza
+api-version: 1.15
+depend:
+  - WorldGuard
+  - Vault
+
+
+commands:
+  casa:
