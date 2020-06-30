@@ -1,16 +1,15 @@
 package br.firmacore.services.impl;
 
-import br.firmacore.Main;
 import br.firmacore.controllers.house.HouseController;
 import br.firmacore.controllers.house.HouseManager;
 import br.firmacore.controllers.tribute.TributeController;
 import br.firmacore.controllers.tribute.TributeManager;
 import br.firmacore.controllers.tribute.repositories.TributeRepository;
 import br.firmacore.controllers.tribute.repositories.models.Tribute;
-import br.firmacore.controllers.tribute.runnables.TributeRunnable;
 import br.firmacore.enums.PropertyType;
 import br.firmacore.services.api.TributeService;
 import br.firmacore.utils.MessageUtils;
+import org.bukkit.Bukkit;
 
 import java.util.Calendar;
 
@@ -19,10 +18,10 @@ public class TributeServiceImpl implements TributeService {
     TributeRepository tributeRepository;
     HouseManager houseManager;
 
-    public TributeServiceImpl(Main plugin){
-        this.tributeManager = plugin.getTributeController().getTributeManager();
-        this.tributeRepository = plugin.getTributeController().getTributeRepository();
-        this.houseManager = plugin.getHouseController().getHouseManager();
+    public TributeServiceImpl(TributeController tributeController, HouseManager houseManager){
+        this.tributeManager = tributeController.getTributeManager();
+        this.tributeRepository = tributeController.getTributeRepository();
+        this.houseManager = houseManager;
     }
 
     @Override
@@ -43,7 +42,12 @@ public class TributeServiceImpl implements TributeService {
                     return;
                 }
 
-                this.tributeManager.add(new Tribute(uuid, PropertyType.CASA, value));
+                Tribute tribute = new Tribute(uuid, PropertyType.CASA, value);
+                this.tributeManager.add(tribute);
+                this.tributeRepository.saveOrUpdate(tribute);
+                MessageUtils.messageToPlayer(
+                        Bukkit.getPlayer(house.getUuid()),
+                        "Tributo adicionado!");
             }
         });
     }

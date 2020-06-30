@@ -16,9 +16,9 @@ public class TributeController {
     public TributeController(Main plugin){
         this.tributeRepository = new TributeRepository(plugin);
         this.tributeManager = new TributeManager(plugin);
-        this.tributeService = new TributeServiceImpl(plugin);
+        this.tributeService = new TributeServiceImpl(this, plugin.getHouseController().getHouseManager());
 
-        new TributeRunnable(plugin).runTaskTimer(plugin, 0, 20 * 60);
+        new TributeRunnable(this.tributeService).runTaskTimer(plugin, 0, 20 * 60);
     }
 
     public TributeRepository getTributeRepository() {

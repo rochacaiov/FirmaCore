@@ -8,6 +8,7 @@ import br.firmacore.controllers.house.exceptions.HouseMembersLimitException;
 import br.firmacore.controllers.house.exceptions.HouseSizeLimitException;
 import br.firmacore.controllers.house.exceptions.HouseWorldException;
 import br.firmacore.enums.Permissions;
+import br.firmacore.enums.PropertyType;
 import br.firmacore.hooks.VaultHook;
 import br.firmacore.hooks.exceptions.PlayerHasNoMoneyException;
 import br.firmacore.services.api.HouseService;
@@ -74,10 +75,19 @@ public class HouseServiceImpl implements HouseService {
         Player owner = propertyExpandVO.getOwner();
         World world = propertyExpandVO.getWorld();
         House house = this.houseManager.getHouse(propertyExpandVO.getOwner().getName());
+        ProtectedRegion oldRegion = this.propertyService.getProperty(owner.getName(), HouseController.AREA_TYPE);
         int size = propertyExpandVO.getSize();
 
         if (!sizeInLimit(propertyExpandVO.getOwner(), size + size)) throw new HouseSizeLimitException();
         if (!propertyService.playerIsInProperty(owner, HouseController.AREA_TYPE)) throw new PlayerIsntInProperty();
+
+        WEBorderVO weBorderVO = new WEBorderVO();
+        weBorderVO.setWorld(world);
+        weBorderVO.setWallZMax(oldRegion.getMaximumPoint().getZ());
+        weBorderVO.setWallXMax(oldRegion.getMaximumPoint().getX());
+        weBorderVO.setWallZMin(oldRegion.getMinimumPoint().getZ());
+        weBorderVO.setWallXMin(oldRegion.getMinimumPoint().getX());
+        WEServiceImpl.removeBorder(weBorderVO);
 
         ProtectedRegion newRegion = propertyService.expandProperty(propertyExpandVO, HouseController.AREA_TYPE);
         setHouseFlags(newRegion, owner, propertyService.isPvP(newRegion));
@@ -88,7 +98,6 @@ public class HouseServiceImpl implements HouseService {
         propertyService.removeProperty(owner.getName(), owner.getWorld(), HouseController.AREA_TYPE);
         propertyService.saveProperty(newRegion);
 
-        WEBorderVO weBorderVO = new WEBorderVO();
         weBorderVO.setWorld(world);
         weBorderVO.setWallXMax(newRegion.getMaximumPoint().getX());
         weBorderVO.setWallZMax(newRegion.getMaximumPoint().getZ());
@@ -97,6 +106,7 @@ public class HouseServiceImpl implements HouseService {
         WEServiceImpl.createBorder(weBorderVO);
 
         this.houseManager.saveOrUpdate(house);
+        this.houseRepository.saveOrUpdate(house);
     }
 
     @Override

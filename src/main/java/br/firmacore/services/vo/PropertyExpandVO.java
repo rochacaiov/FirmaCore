@@ -1,5 +1,6 @@
 package br.firmacore.services.vo;
 
+import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 
