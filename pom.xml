@@ -73,6 +73,12 @@
             <scope>provided</scope>
         </dependency>
 
+        <dependency>
+            <groupId>io.github.mrblobman</groupId>
+            <artifactId>SpigotCommandLib</artifactId>
+            <version>1.3-SNAPSHOT</version>
+        </dependency>
+
         <!-- NormDatabase and MySQL -->
         <dependency>
             <groupId>com.dieselpoint</groupId>

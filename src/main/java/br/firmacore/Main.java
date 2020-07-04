@@ -1,49 +1,51 @@
 package br.firmacore;
 
-import br.firmacore.controllers.house.HouseController;
-import br.firmacore.controllers.tribute.TributeController;
 import br.firmacore.database.ConnectionFactory;
 import br.firmacore.hooks.VaultHook;
+import br.firmacore.services.house.api.HouseService;
+import br.firmacore.services.property.api.PropertyService;
+import br.firmacore.services.house.HouseServiceImpl;
+import br.firmacore.services.property.PropertyServiceImpl;
 import br.firmacore.utils.MessageUtils;
 import net.md_5.bungee.api.ChatColor;
+import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class Main extends JavaPlugin {
     private ConnectionFactory connectionFactory;
     private CommandManager commandManager;
-    private HouseController houseController;
-    private TributeController tributeController;
+    private PropertyService propertyService;
+    private HouseService houseService;
 
     @Override
     public void onEnable() {
         this.connectionFactory = new ConnectionFactory();
         if(VaultHook.setupEconomy()) MessageUtils.messageToConsole("Vault API configurado. &a" + (char)0x221A);
 
-        this.houseController = new HouseController(this);
-        this.tributeController = new TributeController(this);
+        this.propertyService = new PropertyServiceImpl(Bukkit.getWorlds().get(0));
+        this.houseService = new HouseServiceImpl(this);
         this.commandManager = new CommandManager(this);
+
+        this.commandManager.registerHouseCommands();
+
         cape();
     }
 
     @Override
     public void onDisable() {
-        this.houseController.updateAllHouses();
+        this.houseService.updateAllHouses();
     }
 
     public ConnectionFactory getConnectionFactory() {
         return connectionFactory;
     }
 
-    public CommandManager getCommandManager() {
-        return commandManager;
+    public PropertyService getPropertyService() {
+        return propertyService;
     }
 
-    public HouseController getHouseController(){
-        return this.houseController;
-    }
-
-    public TributeController getTributeController() {
-        return tributeController;
+    public HouseService getHouseService() {
+        return houseService;
     }
 
     private void cape(){

@@ -1,6 +1,7 @@
 package br.firmacore.hooks;
 
 import net.milkbowl.vault.economy.Economy;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.RegisteredServiceProvider;
 
 import static org.bukkit.Bukkit.getServer;
@@ -22,5 +23,9 @@ public class VaultHook {
         }
         econ = rsp.getProvider();
         return econ != null;
+    }
+
+    public static boolean playerHasMoney(Player owner, double money) {
+        return (VaultHook.getEconomy().getBalance(owner)) >= money;
     }
 }

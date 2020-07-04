@@ -5,10 +5,18 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 public final class MessageUtils {
-    private static final String TAG = " §6* F§6irma§c§lCORE §8> ";
+    public static final String PREFIX = " §6* Firma§c§lCORE ";
+    public static final String SUFFIX = "» §6";
+    public static final String INFO_TAG = PREFIX + "§b" + SUFFIX;
+    public static final String SUCESS_TAG = PREFIX + "§a" + SUFFIX;
+    public static final String ERROR_TAG = PREFIX + "§c" + SUFFIX;
+
+    public static void sucessMessageToPlayer(Player sender, String message){
+        sender.sendMessage(SUCESS_TAG + color(message));
+    }
 
     public static void messageToPlayerWithTag(Player sender, String message){
-        sender.sendMessage(TAG + color(message));
+        sender.sendMessage(PREFIX + color(message));
     }
 
     public static void messageToPlayer(Player sender, String message){
@@ -16,7 +24,7 @@ public final class MessageUtils {
     }
 
     public static void messageToBroadcastWithTag(String message){
-        Bukkit.broadcastMessage(TAG + color(message));
+        Bukkit.broadcastMessage(PREFIX + color(message));
     }
 
     public static void messageToBroadcast(String message){
@@ -24,7 +32,7 @@ public final class MessageUtils {
     }
 
     public static void messageToConsole(String message){
-        Bukkit.getLogger().info(TAG + color(message));
+        Bukkit.getLogger().info(PREFIX + color(message));
     }
 
     private static String color(String linha){

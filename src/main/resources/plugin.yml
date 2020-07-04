@@ -7,6 +7,3 @@ depend:
   - WorldGuard
   - Vault
 
-
-commands:
-  casa:

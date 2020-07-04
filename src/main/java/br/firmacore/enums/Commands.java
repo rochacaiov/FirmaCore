@@ -1,7 +1,7 @@
 package br.firmacore.enums;
 
 public enum Commands {
-    CASA, TRIBO;
+    CASA, TRIBO, TRIBUTOS;
 
     public static boolean contains(String command){
         for(Commands ce : Commands.values()){
