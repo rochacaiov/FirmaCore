@@ -1,20 +1,24 @@
 package br.firmacore.hooks.exceptions;
 
+import br.firmacore.Exception;
 import br.firmacore.hooks.VaultHook;
 import br.firmacore.utils.MessageUtils;
 import org.bukkit.entity.Player;
 
-public class PlayerHasNoMoneyException extends Exception {
+public class PlayerHasNoMoneyException extends java.lang.Exception implements Exception {
+    private double value;
 
-    @Override
-    public String getMessage() {
-        return "Jogador sem dinheiro suficiente";
+    public PlayerHasNoMoneyException(double value){
+        super("Jogador não tem dinheiro suficiente!");
+        this.value = value;
     }
 
-    public void exceptionToPlayer(Player player, double value) {
-        MessageUtils.messageToPlayerWithTag(
+    @Override
+    public void exceptionToPlayer(Player player) {
+        MessageUtils.errorMessageToPlayer(
                 player,
-                "&eVocê não tem dinheiro suficiente! Valor: &c" + VaultHook.getEconomy().format(value)
+                "&6Você não tem dinheiro suficiente! &c" +
+                        VaultHook.getEconomy().format(this.value)
         );
     }
 }

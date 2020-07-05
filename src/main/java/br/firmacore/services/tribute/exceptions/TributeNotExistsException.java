@@ -11,7 +11,7 @@ public class TributeNotExistsException extends Exception{
     }
 
     public void exceptionToPlayer(Player player) {
-        MessageUtils.messageToPlayerWithTag(
+        MessageUtils.informativeMessageToPlayer(
                 player,
                 "Você não possui tributos registrados!"
         );

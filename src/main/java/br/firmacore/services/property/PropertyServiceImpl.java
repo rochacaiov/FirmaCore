@@ -2,10 +2,7 @@ package br.firmacore.services.property;
 
 import br.firmacore.enums.PropertyType;
 import br.firmacore.services.property.api.PropertyService;
-import br.firmacore.services.property.exceptions.PlayerIsntInProperty;
-import br.firmacore.services.property.exceptions.PropertyMemberAlreadyExistsException;
-import br.firmacore.services.property.exceptions.PropertyMemberNotExistsException;
-import br.firmacore.services.property.exceptions.PropertyMembersEmptyException;
+import br.firmacore.services.property.exceptions.*;
 import br.firmacore.services.property.vo.PropertyCreateVO;
 import br.firmacore.services.property.vo.WEBorderVO;
 import br.firmacore.utils.MessageUtils;
@@ -35,31 +32,35 @@ public class PropertyServiceImpl implements PropertyService {
     }
 
     @Override
-    public void createProperty(PropertyCreateVO propertyCreateVO, PropertyType propertyType) {
+    public void createProperty(PropertyCreateVO propertyCreateVO, PropertyType propertyType) throws PropertyLimitPerPlayerException {
         String owner = propertyCreateVO.getOwner().getName();
         World world = propertyCreateVO.getWorld();
         int size = propertyCreateVO.getSize();
         int x = propertyCreateVO.getX();
         int z = propertyCreateVO.getZ();
-        System.out.println(size);
-        System.out.println(x);
-        System.out.println(z);
 
-        BlockVector3 max = BlockVector3.at(
-                x + (size/2),
-                256,
-                z + (size/2)
-        );
-        BlockVector3 min = BlockVector3.at(
-                x - (size/2),
-                0,
-                z - (size/2)
-        );
+        if(containsProperty(owner, propertyType)) throw new PropertyLimitPerPlayerException(propertyType);
+
+        if(propertyCreateVO.getMax() == null || propertyCreateVO.getMin() == null){
+            BlockVector3 max = BlockVector3.at(
+                    x + (size/2),
+                    256,
+                    z + (size/2)
+            );
+            BlockVector3 min = BlockVector3.at(
+                    x - (size/2),
+                    0,
+                    z - (size/2)
+            );
+            propertyCreateVO.setMax(max);
+            propertyCreateVO.setMin(min);
+        }
+
 
         ProtectedRegion region = new ProtectedCuboidRegion(
                 owner.toLowerCase() + "_" + propertyType,
-                min,
-                max
+                propertyCreateVO.getMin(),
+                propertyCreateVO.getMax()
         );
 
         setFlagsByPropertyType(owner, region, propertyType);
@@ -77,7 +78,7 @@ public class PropertyServiceImpl implements PropertyService {
     }
 
     @Override
-    public void expandProperty(PropertyCreateVO propertyCreateVO, PropertyType propertyType) throws PlayerIsntInProperty {
+    public void expandProperty(PropertyCreateVO propertyCreateVO, PropertyType propertyType) throws PlayerIsntInProperty, PropertyNotExistsException, PropertyLimitPerPlayerException {
         Player owner = propertyCreateVO.getOwner();
         ProtectedRegion region = getProperty(owner.getName(), propertyType); //Pega proteção atual
         int size = propertyCreateVO.getSize();
@@ -115,35 +116,35 @@ public class PropertyServiceImpl implements PropertyService {
     }
 
     @Override
-    public void addMember(ProtectedRegion region, String target) throws PropertyMemberAlreadyExistsException {
+    public void addMember(ProtectedRegion region, String target, PropertyType propertyType) throws PropertyMemberAlreadyExistsException {
         if(!region.getMembers().contains(target)){
             region.getMembers().addPlayer(target);
             return;
         }
-        throw new PropertyMemberAlreadyExistsException();
+        throw new PropertyMemberAlreadyExistsException(target, propertyType);
     }
 
     @Override
     public void listMembers(Player owner, ProtectedRegion region) throws PropertyMembersEmptyException {
         Set<String> members = region.getMembers().getPlayers();
         if(!members.isEmpty()){
-            MessageUtils.messageToPlayerWithTag(owner, "&6Lista de Membros no Terreno");
-            MessageUtils.messageToPlayer(owner, "");
+            MessageUtils.informativeMessageToPlayer(owner, "&6Lista de Membros no Terreno");
+            MessageUtils.clearMessageToPlayer(owner, "");
             members.forEach(member -> {
-                MessageUtils.messageToPlayer(owner, "    &6● &3" + member.toUpperCase());
+                MessageUtils.clearMessageToPlayer(owner, "    &6● &3" + member.toUpperCase());
             });
-            MessageUtils.messageToPlayer(owner, "");
+            MessageUtils.clearMessageToPlayer(owner, "");
         }
         throw new PropertyMembersEmptyException();
     }
 
     @Override
-    public void removeMember(ProtectedRegion region, String target) throws PropertyMemberNotExistsException {
+    public void removeMember(ProtectedRegion region, String target, PropertyType propertyType) throws PropertyMemberNotExistsException {
         if(!region.getMembers().contains(target)){
             region.getMembers().removePlayer(target);
             return;
         }
-        throw new PropertyMemberNotExistsException();
+        throw new PropertyMemberNotExistsException(target, propertyType);
     }
 
     @Override
@@ -154,8 +155,10 @@ public class PropertyServiceImpl implements PropertyService {
 
     // Getters
     @Override
-    public ProtectedRegion getProperty(String owner, PropertyType propertyType) {
-        return regionManager.getRegion(owner.toLowerCase() + "_" + propertyType);
+    public ProtectedRegion getProperty(String owner, PropertyType propertyType) throws PropertyNotExistsException {
+        ProtectedRegion region = regionManager.getRegion(owner.toLowerCase() + "_" + propertyType);
+        if(region == null) throw new PropertyNotExistsException(propertyType);
+        return region;
     }
 
     private String getGreetMessage(String owner, boolean pvp, PropertyType propertyType) {
@@ -197,6 +200,12 @@ public class PropertyServiceImpl implements PropertyService {
     @Override
     public boolean isPvP(ProtectedRegion region) {
         return region.getFlag(Flags.PVP) == StateFlag.State.ALLOW;
+    }
+
+    @Override
+    public boolean containsProperty(String owner, PropertyType propertyType) {
+        ProtectedRegion region = this.regionManager.getRegion(owner + "_" + propertyType);
+        return region != null;
     }
 
     @Override

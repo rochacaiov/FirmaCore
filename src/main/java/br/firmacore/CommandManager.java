@@ -1,5 +1,6 @@
 package br.firmacore;
 
+import br.firmacore.commands.HouseCommand;
 import br.firmacore.commands.HouseSubCommands;
 import io.github.mrblobman.spigotcommandlib.registry.CommandLib;
 
@@ -13,7 +14,7 @@ public class CommandManager {
     }
 
     public void registerHouseCommands(){
-        //this.lib.registerCommandHandler(new HouseCommand());
+        this.lib.registerCommandHandler(new HouseCommand());
         this.lib.registerSubCommandHandler(new HouseSubCommands(this.plugin), new String[]{"casa"});
     }
 }

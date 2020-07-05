@@ -1,4 +1,4 @@
-package br.firmacore.services;
+package br.firmacore;
 
 import org.bukkit.entity.Player;
 

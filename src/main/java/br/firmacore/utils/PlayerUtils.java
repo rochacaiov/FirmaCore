@@ -23,16 +23,20 @@ public final class PlayerUtils {
 
     public static void teleportPlayer(Main plugin, Player player, Location location){
         double xPlayer = player.getLocation().getBlockX();
-        MessageUtils.messageToPlayerWithTag(player, "&6Você será teleportado em &85 &6segundos. Não se mova!");
+        MessageUtils.informativeMessageToPlayer(player, "&6Você será teleportado em &85 &6segundos. Não se mova!");
         new BukkitRunnable() {
             @Override
             public void run() {
                 if(player.getLocation().getBlockX() == xPlayer){
-                    MessageUtils.messageToPlayerWithTag(player, "&eTeleportando...");
+                    MessageUtils.informativeMessageToPlayer(player, "&eTeleportando...");
                     player.teleportAsync(location, PlayerTeleportEvent.TeleportCause.COMMAND);
                     return;
                 }
-                MessageUtils.messageToPlayerWithTag(player, "&cTeleporte cancelado. Você se moveu!");
+
+                MessageUtils.errorMessageToPlayer(
+                        player,
+                        "&cTeleporte cancelado. Você se moveu!"
+                );
             }
         }.runTaskLater(plugin, 20 * 5);
     }

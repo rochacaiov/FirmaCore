@@ -21,7 +21,7 @@ public class HouseRepository {
         return this.database.sql("SELECT * FROM `tb_house`").results(House.class);
     }
 
-    public void saveOrUpdate(House house) {
+    public void insert(House house) {
         this.database.insert(house);
     }
 

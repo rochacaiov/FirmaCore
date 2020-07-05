@@ -68,7 +68,7 @@ public class TributeServiceImpl implements TributeService {
 
         double tributeValue = tribute.getValue();
 
-        if (!VaultHook.playerHasMoney(owner, tributeValue)) throw new PlayerHasNoMoneyException();
+        if (!VaultHook.playerHasMoney(owner, tributeValue)) throw new PlayerHasNoMoneyException(tributeValue);
 
         tribute.setValue(0);
         tribute.setAmount(0);
@@ -84,16 +84,16 @@ public class TributeServiceImpl implements TributeService {
 
     public void listTributes(Player owner) throws TributeNotExistsException {
         this.tributeManager.getTributesOwner(owner.getName()).forEach(tribute -> {
-            MessageUtils.messageToPlayer(owner, "Lista de Tributos");
+            MessageUtils.clearMessageToPlayer(owner, "Lista de Tributos");
             if(tribute.getPropertyType() == PropertyType.CASA){
-                MessageUtils.messageToPlayer(owner, "CATEGORIA CASA");
-                MessageUtils.messageToPlayer(owner, "VALOR: " + tribute.getValue());
-                MessageUtils.messageToPlayer(owner, "QTD: " + tribute.getAmount());
+                MessageUtils.clearMessageToPlayer(owner, "CATEGORIA CASA");
+                MessageUtils.clearMessageToPlayer(owner, "VALOR: " + tribute.getValue());
+                MessageUtils.clearMessageToPlayer(owner, "QTD: " + tribute.getAmount());
             }
             if(tribute.getPropertyType() == PropertyType.LOJA){
-                MessageUtils.messageToPlayer(owner, "CATEGORIA CASA");
-                MessageUtils.messageToPlayer(owner, "VALOR: " + tribute.getValue());
-                MessageUtils.messageToPlayer(owner, "QTD: " + tribute.getAmount());
+                MessageUtils.clearMessageToPlayer(owner, "CATEGORIA CASA");
+                MessageUtils.clearMessageToPlayer(owner, "VALOR: " + tribute.getValue());
+                MessageUtils.clearMessageToPlayer(owner, "QTD: " + tribute.getAmount());
             }
 
         });

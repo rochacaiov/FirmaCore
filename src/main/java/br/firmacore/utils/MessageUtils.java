@@ -15,11 +15,15 @@ public final class MessageUtils {
         sender.sendMessage(SUCESS_TAG + color(message));
     }
 
-    public static void messageToPlayerWithTag(Player sender, String message){
-        sender.sendMessage(PREFIX + color(message));
+    public static void errorMessageToPlayer(Player sender, String message){
+        sender.sendMessage(ERROR_TAG + color(message));
     }
 
-    public static void messageToPlayer(Player sender, String message){
+    public static void informativeMessageToPlayer(Player sender, String message){
+        sender.sendMessage(INFO_TAG + color(message));
+    }
+
+    public static void clearMessageToPlayer(Player sender, String message){
         sender.sendMessage(color(message));
     }
 
@@ -32,7 +36,7 @@ public final class MessageUtils {
     }
 
     public static void messageToConsole(String message){
-        Bukkit.getLogger().info(PREFIX + color(message));
+        Bukkit.getLogger().info(INFO_TAG + color(message));
     }
 
     private static String color(String linha){

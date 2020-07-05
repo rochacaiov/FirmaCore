@@ -1,8 +1,7 @@
 package br.firmacore.services.house;
 
 import br.firmacore.Main;
-import br.firmacore.services.house.cache.HouseManager;
-import br.firmacore.services.house.exceptions.HouseNotExistsException;
+import br.firmacore.services.house.cache.HouseCache;
 import br.firmacore.services.house.repository.HouseRepository;
 import br.firmacore.services.house.repository.model.House;
 import br.firmacore.enums.Permissions;
@@ -10,11 +9,10 @@ import br.firmacore.enums.PropertyType;
 import br.firmacore.hooks.VaultHook;
 import br.firmacore.hooks.exceptions.PlayerHasNoMoneyException;
 import br.firmacore.services.house.api.HouseService;
-import br.firmacore.services.property.exceptions.PropertyLimitPerPlayerException;
+import br.firmacore.services.property.api.PropertyService;
 import br.firmacore.services.property.exceptions.PropertyLimitSizeException;
 import br.firmacore.services.property.exceptions.PropertyWorldEnvironmentException;
 import br.firmacore.utils.MessageUtils;
-import org.apache.commons.lang.math.NumberUtils;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
@@ -22,62 +20,60 @@ import org.bukkit.entity.Player;
 public class HouseServiceImpl implements HouseService {
     public static final double BLOCK_VALUE = 1000.00;
     public static final double PVP_VALUE = 10000.00;
-    private HouseManager houseManager;
-    private HouseRepository houseRepository;
+    private final HouseRepository HOUSE_REPOSITORY;
+    private PropertyService propertyService;
 
     public HouseServiceImpl(Main plugin){
-        this.houseManager = new HouseManager(plugin);
-        this.houseRepository = new HouseRepository(plugin);
+        HOUSE_REPOSITORY = new HouseRepository(plugin);
 
-        this.houseRepository.getAll().forEach(this.houseManager::add);
+        HOUSE_REPOSITORY.getAll().forEach(HouseCache::add);
     }
 
     @Override
-    public void createHouse(Player owner, World world, String _size) throws
-            PlayerHasNoMoneyException, PropertyLimitPerPlayerException, PropertyLimitSizeException, PropertyWorldEnvironmentException {
+    public void createHouse(Player owner, World world, int size) throws
+            PlayerHasNoMoneyException, PropertyLimitSizeException, PropertyWorldEnvironmentException {
 
-        if(!NumberUtils.isNumber(_size)) throw new NumberFormatException();
-        int size = Integer.parseInt(_size);
-        if (playerAlreadyHaveHouse(owner.getName())) throw new PropertyLimitPerPlayerException(owner, PropertyType.CASA);
-        if (!worldEnvironmentException(world)) throw new PropertyWorldEnvironmentException(owner, PropertyType.CASA);
-        if (!limitSizeException(owner, size)) throw new PropertyLimitSizeException(owner, PropertyType.CASA);
-        if (!VaultHook.playerHasMoney(owner, getSizeValue(size))) throw new PlayerHasNoMoneyException();
+        if (!worldEnvironmentException(world)) throw new PropertyWorldEnvironmentException(PropertyType.CASA);
+        if (!sizeLimitException(owner, size)) throw new PropertyLimitSizeException(PropertyType.CASA);
+        if (!VaultHook.playerHasMoney(owner, getSizeValue(size))) throw new PlayerHasNoMoneyException(getSizeValue(size));
 
 
         House house = new House(owner, size);
-        this.houseManager.saveOrUpdate(house);
-        this.houseRepository.saveOrUpdate(house);
+        HouseCache.saveOrUpdate(house);
+        HOUSE_REPOSITORY.insert(house);
     }
 
     @Override
     public void expandHouse(House house, Player owner, int size) throws
             PlayerHasNoMoneyException, PropertyLimitSizeException {
 
-        if (!limitSizeException(owner, size + size)) throw new PropertyLimitSizeException(owner, PropertyType.CASA);
-        if (!VaultHook.playerHasMoney(owner, getSizeValue(size))) throw new PlayerHasNoMoneyException();
+        if (!sizeLimitException(owner, house.getSize() + size)) throw new PropertyLimitSizeException(PropertyType.CASA);
+        if (!VaultHook.playerHasMoney(owner, getSizeValue(size))) throw new PlayerHasNoMoneyException(getSizeValue(size));
 
+        System.out.println(house.getSize());
         house.setSize(house.getSize() + size);
 
-        this.houseManager.saveOrUpdate(house);
-        this.houseRepository.saveOrUpdate(house); // REMOVER
+        System.out.println(house.getSize());
+        HouseCache.saveOrUpdate(house);
+        HOUSE_REPOSITORY.update(house); // REMOVER
     }
 
     @Override
-    public void infoHouse(Player owner) throws HouseNotExistsException {
+    public void infoHouse(Player owner) {
         int size = getHouse(owner.getName()).getSize();
 
-        MessageUtils.messageToPlayer(owner, "");
-        MessageUtils.messageToPlayerWithTag(owner, "&6Informações da Casa");
-        MessageUtils.messageToPlayer(owner, "");
-        MessageUtils.messageToPlayer(owner, "   &6● &7Proprietário: &3" + owner.getName().toUpperCase());
-        MessageUtils.messageToPlayer(owner, "   &6● &7Tamanho: &8" + size);
-        MessageUtils.messageToPlayer(owner, "");
+        MessageUtils.clearMessageToPlayer(owner, "");
+        MessageUtils.informativeMessageToPlayer(owner, "&6Informações da Casa");
+        MessageUtils.clearMessageToPlayer(owner, "");
+        MessageUtils.clearMessageToPlayer(owner, "   &6● &7Proprietário: &3" + owner.getName().toUpperCase());
+        MessageUtils.clearMessageToPlayer(owner, "   &6● &7Tamanho: &8" + size);
+        MessageUtils.clearMessageToPlayer(owner, "");
     }
 
     @Override
     public void removeHouse(House house) {
-        this.houseManager.remove(house);
-        this.houseRepository.delete(house);
+        HouseCache.remove(house);
+        HOUSE_REPOSITORY.delete(house);
     }
 
     @Override
@@ -86,18 +82,14 @@ public class HouseServiceImpl implements HouseService {
         house.setY(home.getBlockY());
         house.setZ(home.getBlockZ());
 
-        this.houseManager.saveOrUpdate(house);
-        this.houseRepository.saveOrUpdate(house);
+        HouseCache.saveOrUpdate(house);
+        HOUSE_REPOSITORY.insert(house);
     }
 
 
     @Override
-    public House getHouse(String owner) throws HouseNotExistsException {
-        House house = this.houseManager.getHouseByOwner(owner);
-        if(house != null){
-            return house;
-        }
-        throw new HouseNotExistsException();
+    public House getHouse(String owner) {
+        return HouseCache.getHouse(owner);
     }
 
     @Override
@@ -109,7 +101,7 @@ public class HouseServiceImpl implements HouseService {
     // Cache & MySQL
     @Override
     public void updateAllHouses(){
-        this.houseManager.getHouses().forEach(house -> this.houseRepository.update(house));
+        HouseCache.getAllHouses().forEach(HOUSE_REPOSITORY::update);
     }
 
 
@@ -119,16 +111,8 @@ public class HouseServiceImpl implements HouseService {
                 !world.getEnvironment().equals(World.Environment.NETHER);
     }
 
-    private boolean limitSizeException(Player owner, int size) {
+    private boolean sizeLimitException(Player owner, int size) {
         return size >= 10 && (size <= 50 || !owner.hasPermission(Permissions.VIP.getPermission()));
-    }
-
-    private boolean limitMembersException(Player owner, int amountMembers) {
-        return amountMembers == 3 || owner.hasPermission(Permissions.VIP.getPermission()) && amountMembers == 6;
-    }
-
-    private boolean playerAlreadyHaveHouse(String owner){
-        return this.houseManager.contains(owner);
     }
 
 }

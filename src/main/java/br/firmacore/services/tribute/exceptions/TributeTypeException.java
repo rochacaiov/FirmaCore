@@ -11,7 +11,7 @@ public class TributeTypeException extends Exception{
     }
 
     public void exceptionToPlayer(Player player) {
-        MessageUtils.messageToPlayerWithTag(
+        MessageUtils.informativeMessageToPlayer(
                 player,
                 "Categoria de tributos inexistente!"
         );
