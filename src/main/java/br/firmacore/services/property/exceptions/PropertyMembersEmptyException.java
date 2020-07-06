@@ -8,17 +8,18 @@ import org.bukkit.entity.Player;
 public class PropertyMembersEmptyException extends java.lang.Exception implements Exception {
     private PropertyType propertyType;
 
-    public PropertyMembersEmptyException(){
+    public PropertyMembersEmptyException(PropertyType propertyType){
         super("Nenhum jogador foi encontrado como membro na propriedade");
+        this.propertyType = propertyType;
     }
 
     @Override
     public void exceptionToPlayer(Player player) {
         MessageUtils.errorMessageToPlayer(
                 player,
-                "&6Sua &8" +
+                "Sua &8" +
                         this.propertyType +
-                        " &6não possui nenhum membro adicionado"
+                        " &cnão possui nenhum membro adicionado"
         );
     }
 }

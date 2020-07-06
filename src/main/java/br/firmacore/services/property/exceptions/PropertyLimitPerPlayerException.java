@@ -18,7 +18,7 @@ public class PropertyLimitPerPlayerException extends java.lang.Exception impleme
     public void exceptionToPlayer(Player player) {
         MessageUtils.errorMessageToPlayer(
                 player,
-                "Você atingiu o limite máximo de propriedades do tipo " +
+                "Você atingiu o limite máximo de propriedades do tipo &8" +
                         this.propertyType
         );
     }

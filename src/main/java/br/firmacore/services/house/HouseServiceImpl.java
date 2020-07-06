@@ -11,6 +11,7 @@ import br.firmacore.hooks.exceptions.PlayerHasNoMoneyException;
 import br.firmacore.services.house.api.HouseService;
 import br.firmacore.services.property.api.PropertyService;
 import br.firmacore.services.property.exceptions.PropertyLimitSizeException;
+import br.firmacore.services.property.exceptions.PropertyNotExistsException;
 import br.firmacore.services.property.exceptions.PropertyWorldEnvironmentException;
 import br.firmacore.utils.MessageUtils;
 import org.bukkit.Location;
@@ -59,18 +60,6 @@ public class HouseServiceImpl implements HouseService {
     }
 
     @Override
-    public void infoHouse(Player owner) {
-        int size = getHouse(owner.getName()).getSize();
-
-        MessageUtils.clearMessageToPlayer(owner, "");
-        MessageUtils.informativeMessageToPlayer(owner, "&6Informações da Casa");
-        MessageUtils.clearMessageToPlayer(owner, "");
-        MessageUtils.clearMessageToPlayer(owner, "   &6● &7Proprietário: &3" + owner.getName().toUpperCase());
-        MessageUtils.clearMessageToPlayer(owner, "   &6● &7Tamanho: &8" + size);
-        MessageUtils.clearMessageToPlayer(owner, "");
-    }
-
-    @Override
     public void removeHouse(House house) {
         HouseCache.remove(house);
         HOUSE_REPOSITORY.delete(house);
@@ -83,12 +72,13 @@ public class HouseServiceImpl implements HouseService {
         house.setZ(home.getBlockZ());
 
         HouseCache.saveOrUpdate(house);
-        HOUSE_REPOSITORY.insert(house);
+        HOUSE_REPOSITORY.update(house);
     }
 
 
     @Override
-    public House getHouse(String owner) {
+    public House getHouse(String owner) throws PropertyNotExistsException {
+        if(!HouseCache.contains(owner)) throw new PropertyNotExistsException(PropertyType.CASA);
         return HouseCache.getHouse(owner);
     }
 

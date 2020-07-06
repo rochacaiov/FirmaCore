@@ -13,14 +13,6 @@ import java.util.UUID;
 
 public final class PlayerUtils {
 
-    public static OfflinePlayer uuidToOfflinePlayer(UUID uuid){
-        return Bukkit.getOfflinePlayer(uuid);
-    }
-
-    public static Player uuidToPlayer(String uuid){
-        return Bukkit.getPlayer(UUID.fromString(uuid));
-    }
-
     public static void teleportPlayer(Main plugin, Player player, Location location){
         double xPlayer = player.getLocation().getBlockX();
         MessageUtils.informativeMessageToPlayer(player, "&6Você será teleportado em &85 &6segundos. Não se mova!");
@@ -28,7 +20,7 @@ public final class PlayerUtils {
             @Override
             public void run() {
                 if(player.getLocation().getBlockX() == xPlayer){
-                    MessageUtils.informativeMessageToPlayer(player, "&eTeleportando...");
+                    MessageUtils.successMessageToPlayer(player, "&eTeleportando...");
                     player.teleportAsync(location, PlayerTeleportEvent.TeleportCause.COMMAND);
                     return;
                 }
@@ -56,9 +48,5 @@ public final class PlayerUtils {
         );
 
         firework.setFireworkMeta(meta);
-    }
-
-    public static Location getLocation(World world, double x, double y, double z){
-        return new Location(world, x, y, z);
     }
 }

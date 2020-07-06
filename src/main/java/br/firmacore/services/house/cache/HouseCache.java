@@ -8,14 +8,13 @@ import java.util.Set;
 public final class HouseCache {
     private static Set<House> houses = new HashSet<>();
 
-
-    public static void add(House house){
-        houses.add(house);
-    }
-
     public static void saveOrUpdate(House house){
         remove(house);
         add(house);
+    }
+
+    public static void add(House house){
+        houses.add(house);
     }
 
     public static void remove(House house){
@@ -24,15 +23,6 @@ public final class HouseCache {
 
     public static void format(){
         houses.clear();
-    }
-
-    public static boolean contains(String owner){
-        for(House house : houses){
-            if(house.getOwner().equals(owner)){
-                return true;
-            }
-        }
-        return false;
     }
 
     public static House getHouse(String owner) {
@@ -46,5 +36,9 @@ public final class HouseCache {
 
     public static Set<House> getAllHouses(){
         return houses;
+    }
+
+    public static boolean contains(String owner){
+        return getHouse(owner) != null;
     }
 }

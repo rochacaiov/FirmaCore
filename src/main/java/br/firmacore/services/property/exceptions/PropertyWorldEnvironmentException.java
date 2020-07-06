@@ -17,9 +17,9 @@ public class PropertyWorldEnvironmentException extends java.lang.Exception imple
     public void exceptionToPlayer(Player player) {
         MessageUtils.errorMessageToPlayer(
                 player,
-                "&6Você não pode comprar uma &8" +
+                "Você não pode comprar uma &8" +
                         this.propertyType +
-                        " &6neste mundo!"
+                        " &cneste mundo!"
         );
     }
 }

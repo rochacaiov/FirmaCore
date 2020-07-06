@@ -21,7 +21,7 @@ public class PropertyMemberNotExistsException extends java.lang.Exception implem
                 player,
                 "&3@" +
                         this.target +
-                        " &6não está adicionado em sua " +
+                        " &cnão está adicionado em sua &8" +
                         this.propertyType
                 );
     }

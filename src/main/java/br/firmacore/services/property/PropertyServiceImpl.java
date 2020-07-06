@@ -5,7 +5,6 @@ import br.firmacore.services.property.api.PropertyService;
 import br.firmacore.services.property.exceptions.*;
 import br.firmacore.services.property.vo.PropertyCreateVO;
 import br.firmacore.services.property.vo.WEBorderVO;
-import br.firmacore.utils.MessageUtils;
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldguard.WorldGuard;
@@ -15,6 +14,7 @@ import com.sk89q.worldguard.protection.flags.StateFlag;
 import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.regions.ProtectedCuboidRegion;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
+import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 
@@ -39,18 +39,18 @@ public class PropertyServiceImpl implements PropertyService {
         int x = propertyCreateVO.getX();
         int z = propertyCreateVO.getZ();
 
-        if(containsProperty(owner, propertyType)) throw new PropertyLimitPerPlayerException(propertyType);
+        if (containsProperty(owner, propertyType)) throw new PropertyLimitPerPlayerException(propertyType);
 
-        if(propertyCreateVO.getMax() == null || propertyCreateVO.getMin() == null){
+        if (propertyCreateVO.getMax() == null || propertyCreateVO.getMin() == null) {
             BlockVector3 max = BlockVector3.at(
-                    x + (size/2),
+                    x + (size / 2),
                     256,
-                    z + (size/2)
+                    z + (size / 2)
             );
             BlockVector3 min = BlockVector3.at(
-                    x - (size/2),
+                    x - (size / 2),
                     0,
-                    z - (size/2)
+                    z - (size / 2)
             );
             propertyCreateVO.setMax(max);
             propertyCreateVO.setMin(min);
@@ -116,39 +116,24 @@ public class PropertyServiceImpl implements PropertyService {
     }
 
     @Override
-    public void addMember(ProtectedRegion region, String target, PropertyType propertyType) throws PropertyMemberAlreadyExistsException {
-        if(!region.getMembers().contains(target)){
-            region.getMembers().addPlayer(target);
-            return;
-        }
-        throw new PropertyMemberAlreadyExistsException(target, propertyType);
+    public void addMember(ProtectedRegion region, String target, PropertyType propertyType) throws PropertyMemberAlreadyExistsException, PlayerOfflineException {
+        if (Bukkit.getPlayer(target) == null) throw new PlayerOfflineException(target);
+        if (region.getMembers().contains(target)) throw new PropertyMemberAlreadyExistsException(target, propertyType);
+        if (region.getOwners().contains(target)) throw new PropertyMemberAlreadyExistsException(target, propertyType);
+
+        region.getMembers().addPlayer(target);
     }
 
     @Override
-    public void listMembers(Player owner, ProtectedRegion region) throws PropertyMembersEmptyException {
-        Set<String> members = region.getMembers().getPlayers();
-        if(!members.isEmpty()){
-            MessageUtils.informativeMessageToPlayer(owner, "&6Lista de Membros no Terreno");
-            MessageUtils.clearMessageToPlayer(owner, "");
-            members.forEach(member -> {
-                MessageUtils.clearMessageToPlayer(owner, "    &6● &3" + member.toUpperCase());
-            });
-            MessageUtils.clearMessageToPlayer(owner, "");
-        }
-        throw new PropertyMembersEmptyException();
+    public void removeMember(ProtectedRegion region, String target, PropertyType propertyType) throws PropertyMemberNotExistsException, PropertyMemberAlreadyExistsException {
+        if (!region.getMembers().contains(target)) throw new PropertyMemberNotExistsException(target, propertyType);
+        if (region.getOwners().contains(target)) throw new PropertyMemberAlreadyExistsException(target, propertyType);
+
+        region.getMembers().removePlayer(target);
     }
 
     @Override
-    public void removeMember(ProtectedRegion region, String target, PropertyType propertyType) throws PropertyMemberNotExistsException {
-        if(!region.getMembers().contains(target)){
-            region.getMembers().removePlayer(target);
-            return;
-        }
-        throw new PropertyMemberNotExistsException(target, propertyType);
-    }
-
-    @Override
-    public void saveProperty(ProtectedRegion region){
+    public void saveProperty(ProtectedRegion region) {
         regionManager.addRegion(region);
     }
 
@@ -157,9 +142,16 @@ public class PropertyServiceImpl implements PropertyService {
     @Override
     public ProtectedRegion getProperty(String owner, PropertyType propertyType) throws PropertyNotExistsException {
         ProtectedRegion region = regionManager.getRegion(owner.toLowerCase() + "_" + propertyType);
-        if(region == null) throw new PropertyNotExistsException(propertyType);
+        if (region == null) throw new PropertyNotExistsException(propertyType);
         return region;
     }
+
+    @Override
+    public Set<String> getMembers(ProtectedRegion region, PropertyType propertyType) throws PropertyMembersEmptyException {
+        if(region.getMembers().getPlayers().isEmpty()) throw new PropertyMembersEmptyException(propertyType);
+        return region.getMembers().getPlayers();
+    }
+
 
     private String getGreetMessage(String owner, boolean pvp, PropertyType propertyType) {
         String pvpTAG = pvp ? " &7[&a&lPVP OFF&7] " : " &7[&c&lPVP ON&7] ";
@@ -168,8 +160,8 @@ public class PropertyServiceImpl implements PropertyService {
     }
 
     // Setters & Booleans
-    private void setFlagsByPropertyType(String owner, ProtectedRegion region, PropertyType propertyType){
-        switch (propertyType){
+    private void setFlagsByPropertyType(String owner, ProtectedRegion region, PropertyType propertyType) {
+        switch (propertyType) {
             case CASA:
                 region.setFlag(
                         Flags.GREET_MESSAGE,
@@ -192,7 +184,7 @@ public class PropertyServiceImpl implements PropertyService {
     }
 
     @Override
-    public void setPVP(ProtectedRegion region){
+    public void setPVP(ProtectedRegion region) {
         boolean pvp = region.getFlag(Flags.PVP) == StateFlag.State.ALLOW;
         region.setFlag(Flags.PVP, pvp ? StateFlag.State.DENY : StateFlag.State.ALLOW);
     }
@@ -215,8 +207,8 @@ public class PropertyServiceImpl implements PropertyService {
                 player.getLocation().getBlockY(),
                 player.getLocation().getBlockZ()
         );
-        for(ProtectedRegion region : regionManager.getApplicableRegions(pos)){
-            if(region.getId().equals(_region.getId())){
+        for (ProtectedRegion region : regionManager.getApplicableRegions(pos)) {
+            if (region.getId().equals(_region.getId())) {
                 return true;
             }
         }

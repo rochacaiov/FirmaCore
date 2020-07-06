@@ -21,7 +21,7 @@ public class PropertyMemberAlreadyExistsException extends java.lang.Exception im
                 player,
                 "&3@" +
                         this.target +
-                        " &6já é membro da sua &8" +
+                        " &cjá é membro da sua &8" +
                         propertyType
         );
     }

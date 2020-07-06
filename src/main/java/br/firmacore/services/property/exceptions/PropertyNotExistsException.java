@@ -21,7 +21,7 @@ public class PropertyNotExistsException extends java.lang.Exception implements E
                 MessageUtils.ERROR_TAG +
                         "&3@" +
                         player.getName() +
-                        " &6não possui nenhuma casa."
+                        " &cnão possui nenhuma casa."
         );
     }
 }

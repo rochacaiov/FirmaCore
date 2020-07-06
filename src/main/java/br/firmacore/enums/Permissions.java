@@ -1,7 +1,7 @@
 package br.firmacore.enums;
 
 public enum Permissions {
-    ADMIN("firmacore.admin"), VIP("firmacore.vip");
+    ADMIN("firmacore.admin"), VIP("firmacore.vip"), MEMBER("firmacore.member");
 
     public final String permission;
 

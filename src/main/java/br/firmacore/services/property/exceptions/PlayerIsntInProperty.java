@@ -12,7 +12,7 @@ public class PlayerIsntInProperty extends java.lang.Exception {
     public void exceptionToPlayer(Player player) {
         MessageUtils.errorMessageToPlayer(
                 player,
-                "&6Você não está em seu terreno!"
+                "Você não está em seu terreno!"
         );
     }
 }

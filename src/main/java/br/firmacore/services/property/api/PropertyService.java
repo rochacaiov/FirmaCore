@@ -7,14 +7,15 @@ import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 
+import java.util.Set;
+
 public interface PropertyService {
     void createProperty(PropertyCreateVO propertyCreateVO, PropertyType propertyType) throws PropertyLimitPerPlayerException;
     void expandProperty(PropertyCreateVO propertyCreateVO, PropertyType propertyType) throws PlayerIsntInProperty, PropertyNotExistsException, PropertyLimitPerPlayerException;
     void removeProperty(ProtectedRegion region, World world);
 
-    void addMember(ProtectedRegion region, String target, PropertyType propertyType) throws PropertyMemberAlreadyExistsException;
-    void listMembers(Player owner, ProtectedRegion region) throws PropertyMembersEmptyException;
-    void removeMember(ProtectedRegion region, String target, PropertyType propertyType) throws PropertyMemberNotExistsException;
+    void addMember(ProtectedRegion region, String target, PropertyType propertyType) throws PropertyMemberAlreadyExistsException, PlayerOfflineException;
+    void removeMember(ProtectedRegion region, String target, PropertyType propertyType) throws PropertyMemberNotExistsException, PropertyMemberAlreadyExistsException;
 
     void saveProperty(ProtectedRegion region);
 
@@ -22,6 +23,7 @@ public interface PropertyService {
 
     //Getters
     ProtectedRegion getProperty(String owner, PropertyType propertyType) throws PropertyNotExistsException;
+    Set<String> getMembers(ProtectedRegion region, PropertyType propertyType) throws PropertyMembersEmptyException;
 
     //Setters & Booleans
     void setPVP(ProtectedRegion region);
