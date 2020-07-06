@@ -21,7 +21,7 @@ public final class PlayerUtils {
             public void run() {
                 if(player.getLocation().getBlockX() == xPlayer){
                     MessageUtils.successMessageToPlayer(player, "&eTeleportando...");
-                    player.teleportAsync(location, PlayerTeleportEvent.TeleportCause.COMMAND);
+                    player.teleport(location, PlayerTeleportEvent.TeleportCause.COMMAND);
                     return;
                 }
 

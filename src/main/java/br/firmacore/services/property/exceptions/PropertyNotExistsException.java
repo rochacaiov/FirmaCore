@@ -16,12 +16,11 @@ public class PropertyNotExistsException extends java.lang.Exception implements E
 
     @Override
     public void exceptionToPlayer(Player player) {
-        MessageUtils.clearMessageToPlayer(
+        MessageUtils.errorMessageToPlayer(
                 player,
-                MessageUtils.ERROR_TAG +
-                        "&3@" +
-                        player.getName() +
-                        " &cnão possui nenhuma casa."
+                "A &8" +
+                        propertyType +
+                        " &cnão existe!"
         );
     }
 }
