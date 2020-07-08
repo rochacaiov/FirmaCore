@@ -11,7 +11,8 @@ import java.io.Serializable;
 public class House implements Serializable {
     private String uuid;
     private String owner;
-    private int size;
+    private int sizeX;
+    private int sizeZ;
     private int x;
     private int y;
     private int z;
@@ -20,10 +21,11 @@ public class House implements Serializable {
 
     }
 
-    public House(Player owner, int size){
+    public House(Player owner, int sizeX, int sizeZ){
         this.uuid = owner.getUniqueId().toString();
         this.owner = owner.getName();
-        this.size = size;
+        this.sizeX = sizeX;
+        this.sizeZ = sizeZ;
         this.x = owner.getLocation().getBlockX();
         this.z = owner.getLocation().getBlockZ();
         this.y = owner.getWorld().getHighestBlockYAt(x, z) + 1;
@@ -40,8 +42,13 @@ public class House implements Serializable {
     }
 
     @Column(nullable = false)
-    public int getSize() {
-        return size;
+    public int getSizeX() {
+        return sizeX;
+    }
+
+    @Column(nullable = false)
+    public int getSizeZ() {
+        return sizeZ;
     }
 
     @Column(nullable = false)
@@ -69,8 +76,12 @@ public class House implements Serializable {
         this.owner = owner;
     }
 
-    public void setSize(int size) {
-        this.size = size;
+    public void setSizeX(int sizeX) {
+        this.sizeX = sizeX;
+    }
+
+    public void setSizeZ(int sizeZ) {
+        this.sizeZ = sizeZ;
     }
 
     public void setX(int x) {

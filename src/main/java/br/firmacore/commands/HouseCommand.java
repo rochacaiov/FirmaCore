@@ -15,7 +15,7 @@ public class HouseCommand implements CommandHandler {
             MessageUtils.clearMessageToPlayer(player, "");
             MessageUtils.informativeMessageToPlayer(player, "&6Sistema de Casas.");
             MessageUtils.clearMessageToPlayer(player, "");
-            MessageUtils.clearMessageToPlayer(player, "  &f/casa comprar [tamanho] &8- &7Compra uma casa");
+            MessageUtils.clearMessageToPlayer(player, "  &f/casa comprar [X] [Z] &8- &7Compra uma casa");
             MessageUtils.clearMessageToPlayer(player, "  &f/casa info &8- &7Informações da casa");
             MessageUtils.clearMessageToPlayer(player, "  &f/casa sethome &8- &7Altera o ponto de teleporte");
             MessageUtils.clearMessageToPlayer(player, "  &f/casa home &8- &7Teleporta para a casa");

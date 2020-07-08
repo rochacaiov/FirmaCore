@@ -9,7 +9,8 @@ public class PropertyCreateVO {
     private World world;
     private BlockVector3 max;
     private BlockVector3 min;
-    private int size;
+    private int sizeX;
+    private int sizeZ;
     private int x;
     private int z;
 
@@ -45,12 +46,20 @@ public class PropertyCreateVO {
         this.min = min;
     }
 
-    public int getSize() {
-        return size;
+    public int getSizeX() {
+        return sizeX;
     }
 
-    public void setSize(int size) {
-        this.size = size;
+    public void setSizeX(int size) {
+        this.sizeX = size;
+    }
+
+    public int getSizeZ() {
+        return sizeZ;
+    }
+
+    public void setSizeZ(int sizeZ) {
+        this.sizeZ = sizeZ;
     }
 
     public int getX() {
@@ -67,5 +76,19 @@ public class PropertyCreateVO {
 
     public void setZ(int z) {
         this.z = z;
+    }
+
+    @Override
+    public String toString() {
+        return "PropertyCreateVO{" +
+                "owner=" + owner +
+                ", world=" + world +
+                ", max=" + max +
+                ", min=" + min +
+                ", sizeX=" + sizeX +
+                ", sizeZ=" + sizeZ +
+                ", x=" + x +
+                ", z=" + z +
+                '}';
     }
 }

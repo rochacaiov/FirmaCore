@@ -35,22 +35,24 @@ public class PropertyServiceImpl implements PropertyService {
     public void createProperty(PropertyCreateVO propertyCreateVO, PropertyType propertyType) throws PropertyLimitPerPlayerException {
         String owner = propertyCreateVO.getOwner().getName();
         World world = propertyCreateVO.getWorld();
-        int size = propertyCreateVO.getSize();
-        int x = propertyCreateVO.getX();
-        int z = propertyCreateVO.getZ();
+        int sizeX = propertyCreateVO.getSizeX();
+        int sizeZ = propertyCreateVO.getSizeZ();
+        int x = propertyCreateVO.getX(); //Player X position
+        int z = propertyCreateVO.getZ(); //Player Z position
+
 
         if (containsProperty(owner, propertyType)) throw new PropertyLimitPerPlayerException(propertyType);
 
         if (propertyCreateVO.getMax() == null || propertyCreateVO.getMin() == null) {
             BlockVector3 max = BlockVector3.at(
-                    x + (size / 2),
+                    sizeX % 2 == 0? x + (sizeX / 2) - 1 : x + (sizeX / 2),
                     256,
-                    z + (size / 2)
+                    sizeZ % 2 == 0? z + (sizeZ / 2) - 1 : z + (sizeZ / 2)
             );
             BlockVector3 min = BlockVector3.at(
-                    x - (size / 2),
+                    x - (sizeX / 2),
                     0,
-                    z - (size / 2)
+                    z - (sizeZ / 2)
             );
             propertyCreateVO.setMax(max);
             propertyCreateVO.setMin(min);
@@ -81,16 +83,17 @@ public class PropertyServiceImpl implements PropertyService {
     public void expandProperty(PropertyCreateVO propertyCreateVO, PropertyType propertyType) throws PlayerIsntInProperty, PropertyNotExistsException, PropertyLimitPerPlayerException {
         Player owner = propertyCreateVO.getOwner();
         ProtectedRegion region = getProperty(owner.getName(), propertyType); //Pega proteção atual
-        int size = propertyCreateVO.getSize();
+        int sizeX = propertyCreateVO.getSizeX();
+        int sizeZ = propertyCreateVO.getSizeZ();
         BlockVector3 max = BlockVector3.at(
-                region.getMaximumPoint().getBlockX() + size,
+                region.getMaximumPoint().getBlockX() + sizeX/2,
                 256,
-                region.getMaximumPoint().getBlockZ() + size
+                region.getMaximumPoint().getBlockZ() + sizeZ/2
         );
         BlockVector3 min = BlockVector3.at(
-                region.getMinimumPoint().getBlockX() - size,
+                region.getMinimumPoint().getBlockX() - sizeX/2,
                 0,
-                region.getMinimumPoint().getBlockZ() - size
+                region.getMinimumPoint().getBlockZ() - sizeZ/2
         );
 
         if (!playerIsInProperty(owner, region)) throw new PlayerIsntInProperty();
