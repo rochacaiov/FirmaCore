@@ -23,9 +23,9 @@ public class PropertyLimitSizeException extends java.lang.Exception implements E
                         player,
                         "Você deve inserir um tamanho permitido!"
                 );
-                MessageUtils.clearMessageToPlayer(player, "  &6● &7Tamanho mínimo: &810");
-                MessageUtils.clearMessageToPlayer(player, "  &6● &7Tamanho máximo: &850");
-                MessageUtils.clearMessageToPlayer(player, "  &6● &7Tamanho máximo: &8100 &a&o(VIP)");
+                MessageUtils.clearMessageToPlayer(player, "  &6● &7Tamanho mínimo &6(X ou Z)&7: &810"); //CHECAR COR
+                MessageUtils.clearMessageToPlayer(player, "  &6● &7Tamanho máximo (blocos totais = X*Z): &82.500");
+                MessageUtils.clearMessageToPlayer(player, "  &6● &7Tamanho máximo (blocos totais = X*Z): &810.000 &a&o(VIP)");
                 MessageUtils.clearMessageToPlayer(player, "");
             break;
         }

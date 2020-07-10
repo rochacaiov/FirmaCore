@@ -2,22 +2,19 @@ package br.firmacore.services.house.api;
 
 import br.firmacore.services.house.repository.model.House;
 import br.firmacore.hooks.exceptions.PlayerHasNoMoneyException;
-import br.firmacore.services.property.exceptions.PropertyLimitPerPlayerException;
-import br.firmacore.services.property.exceptions.PropertyLimitSizeException;
-import br.firmacore.services.property.exceptions.PropertyNotExistsException;
-import br.firmacore.services.property.exceptions.PropertyWorldEnvironmentException;
+import br.firmacore.services.property.exceptions.*;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 
 public interface HouseService {
 
-    void createHouse(Player owner, World world, int size)
+    void createHouse(Player owner, World world, int sizeX, int sizeZ)
             throws PlayerHasNoMoneyException, PropertyLimitPerPlayerException,
-            PropertyLimitSizeException, PropertyWorldEnvironmentException;
+            PropertyLimitSizeException, PropertyWorldEnvironmentException, PropertyRatioRuleException;
 
-    void expandHouse(House house, Player owner, int size)
-            throws PlayerHasNoMoneyException, PropertyLimitSizeException;
+    void resizeHouse(House house, Player owner, int sizeX, int sizeZ)
+            throws PlayerHasNoMoneyException, PropertyLimitSizeException, PropertyRatioRuleException, PropertyNewSizeSmallerException;
 
     void removeHouse(House house);
 
@@ -31,5 +28,5 @@ public interface HouseService {
     // Getters & Booleans
     House getHouse(String owner) throws PropertyNotExistsException;
 
-    double getSizeValue(int size);
+    double getSizeValue(int sizeX, int sizeZ);
 }

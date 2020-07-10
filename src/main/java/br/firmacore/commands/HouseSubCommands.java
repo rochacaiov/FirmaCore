@@ -30,17 +30,19 @@ public class HouseSubCommands implements SubCommandHandler {
     }
 
     @SubCommandHandle(command = "comprar", description = "Compra uma casa")
-    private void buy(Player player, @ArgDescription(name = "tamanho") int size) {
-        double value = this.houseService.getSizeValue(size);
+    private void buy(Player player, @ArgDescription(name = "Tamanho na orientação Leste-Oeste") int sizeX, @ArgDescription(name = "Tamanho na orientação Norte-Sul") int sizeZ) {
+        double value = this.houseService.getSizeValue(sizeX, sizeZ);
         try {
             PropertyCreateVO propertyCreateVO = new PropertyCreateVO();
             propertyCreateVO.setOwner(player);
             propertyCreateVO.setWorld(player.getWorld());
-            propertyCreateVO.setSize(size);
+            propertyCreateVO.setSizeX(sizeX);
+            propertyCreateVO.setSizeZ(sizeZ);
             propertyCreateVO.setX(player.getLocation().getBlockX());
             propertyCreateVO.setZ(player.getLocation().getBlockZ());
 
-            this.houseService.createHouse(player, player.getWorld(), size);
+
+            this.houseService.createHouse(player, player.getWorld(), sizeX, sizeZ);
             this.propertyService.createProperty(propertyCreateVO, PropertyType.CASA);
 
             MessageUtils.successMessageToPlayer(
@@ -60,21 +62,28 @@ public class HouseSubCommands implements SubCommandHandler {
         } catch (PlayerHasNoMoneyException e) {
             e.exceptionToPlayer(player);
             e.printStackTrace();
+        }catch (PropertyRatioRuleException e) {
+            e.exceptionToPlayer(player);
+            e.printStackTrace();
         }
     }
 
-    @SubCommandHandle(command = "expandir", description = "Expande a casa")
-    private void expand(Player player, @ArgDescription(name = "tamanho") int size) {
+    @SubCommandHandle(command = "expandir", description = "Permite que você refaça o terreno da sua casa com novas dimensões.")
+    private void expand(Player player, @ArgDescription(name = "Acréscimo na orientação Leste-Oeste") int sizeX, @ArgDescription(name = "Acréscimo na orientação Norte-Sul") int sizeZ) {
         try {
             House house = this.houseService.getHouse(player.getName());
-            double value = this.houseService.getSizeValue(size);
+            double value = this.houseService.getSizeValue(house.getSizeX() + sizeX, house.getSizeZ() + sizeZ) - this.houseService.getSizeValue(house.getSizeX(), house.getSizeZ());
 
             PropertyCreateVO propertyCreateVO = new PropertyCreateVO();
             propertyCreateVO.setOwner(player);
             propertyCreateVO.setWorld(player.getWorld());
-            propertyCreateVO.setSize(size);
+            propertyCreateVO.setSizeX(sizeX);
+            propertyCreateVO.setSizeZ(sizeZ);
 
-            this.houseService.expandHouse(house, player, size);
+            int newSizeX = house.getSizeX() + sizeX;
+            int newSizeZ = house.getSizeZ() + sizeZ;
+
+            this.houseService.resizeHouse(house, player, newSizeX, newSizeZ);
             this.propertyService.expandProperty(propertyCreateVO, PropertyType.CASA);
 
             MessageUtils.successMessageToPlayer(
@@ -97,6 +106,12 @@ public class HouseSubCommands implements SubCommandHandler {
         } catch (PropertyNotExistsException e) {
             e.exceptionToPlayer(player);
             e.printStackTrace();
+        } catch (PropertyRatioRuleException e) {
+            e.exceptionToPlayer(player);
+            e.printStackTrace();
+        } catch (PropertyNewSizeSmallerException e) {
+            e.exceptionToPlayer(player);
+            e.printStackTrace();
         }
 
     }
@@ -106,13 +121,15 @@ public class HouseSubCommands implements SubCommandHandler {
         try {
             House house = this.houseService.getHouse(player.getName());
             String owner = house.getOwner();
-            int size = house.getSize();
+            int sizeX = house.getSizeX();
+            int sizeZ = house.getSizeZ();
 
             MessageUtils.clearMessageToPlayer(player, "");
             MessageUtils.informativeMessageToPlayer(player, "INFORMAÇÕES DA &8CASA &6DE " + owner);
             MessageUtils.clearMessageToPlayer(player, "");
             MessageUtils.clearMessageToPlayer(player, "   &6● &7Proprietário: &3" + owner);
-            MessageUtils.clearMessageToPlayer(player, "   &6● &7Tamanho: &8" + size);
+            MessageUtils.clearMessageToPlayer(player, "   &6● &7Tamanho X (orientação Leste-Oeste): &8" + sizeX);
+            MessageUtils.clearMessageToPlayer(player, "   &6● &7Tamanho Z (orientação Norte-Sul): &8" + sizeZ);
             MessageUtils.clearMessageToPlayer(player, "");
         } catch (PropertyNotExistsException e) {
             e.exceptionToPlayer(player);
@@ -121,10 +138,11 @@ public class HouseSubCommands implements SubCommandHandler {
     }
 
     @SubCommandHandle(command = "remover", description = "Remove uma casa")
-    private void remove(Player player, @ArgDescription(name = "jogador") String target) {
+    private void remove(Player player) { //IF O JOGADOR ESTIVER DENTRO DO TERRENO
         try {
-            ProtectedRegion region = this.propertyService.getProperty(target, PropertyType.CASA);
-            House house = this.houseService.getHouse(target);
+            String nickname = player.getPlayerListName();
+            ProtectedRegion region = this.propertyService.getProperty(nickname, PropertyType.CASA);
+            House house = this.houseService.getHouse(nickname);
 
             this.propertyService.removeProperty(region, player.getWorld());
             this.houseService.removeHouse(house);
@@ -132,7 +150,7 @@ public class HouseSubCommands implements SubCommandHandler {
             MessageUtils.successMessageToPlayer(
                     player,
                     "Você removeu a casa do jogador &3@" +
-                            target
+                            nickname
             );
         } catch (PropertyNotExistsException e) {
             e.exceptionToPlayer(player);
