@@ -7,7 +7,7 @@ import org.bukkit.block.Block;
 
 public class WEServiceImpl {
 
-    static void createBorder(WEBorderVO weBorderVO) {
+    public static void createBorder(WEBorderVO weBorderVO, Material materialType) {
         World world = weBorderVO.getWorld();
         int wallXMax = weBorderVO.getWallXMax();
         int wallZMax = weBorderVO.getWallZMax();
@@ -15,17 +15,17 @@ public class WEServiceImpl {
         int wallZMin = weBorderVO.getWallZMin();
 
         for (int x = wallXMin; x <= wallXMax; x++) {
-            world.getBlockAt(x, (world.getHighestBlockYAt(x, wallZMax) + 1), wallZMax).setType(Material.OAK_FENCE);
-            world.getBlockAt(x, (world.getHighestBlockYAt(x, wallZMin) + 1), wallZMin).setType(Material.OAK_FENCE);
+            world.getBlockAt(x, (world.getHighestBlockYAt(x, wallZMax) + 1), wallZMax).setType(materialType);
+            world.getBlockAt(x, (world.getHighestBlockYAt(x, wallZMin) + 1), wallZMin).setType(materialType);
         }
 
         for (int z = wallZMin; z <= wallZMax; z++) {
-            world.getBlockAt(wallXMax, (world.getHighestBlockYAt(wallXMax, z) + 1), z).setType(Material.OAK_FENCE);
-            world.getBlockAt(wallXMin, (world.getHighestBlockYAt(wallXMin, z) + 1), z).setType(Material.OAK_FENCE);
+            world.getBlockAt(wallXMax, (world.getHighestBlockYAt(wallXMax, z) + 1), z).setType(materialType);
+            world.getBlockAt(wallXMin, (world.getHighestBlockYAt(wallXMin, z) + 1), z).setType(materialType);
         }
     }
 
-    static void removeBorder(WEBorderVO weBorderVO) {
+    public static void removeBorder(WEBorderVO weBorderVO, Material materialType) {
         World world = weBorderVO.getWorld();
         int wallXMax = weBorderVO.getWallXMax();
         int wallZMax = weBorderVO.getWallZMax();
@@ -39,11 +39,11 @@ public class WEServiceImpl {
                     Block wallX2 = world.getBlockAt(x, y, wallZMin);
                     Block wallZ1 = world.getBlockAt(wallXMax, y, z);
                     Block wallZ2 = world.getBlockAt(wallXMin, y, z);
-                    if (wallX1.getType() == Material.OAK_FENCE || wallX2.getType() == Material.OAK_FENCE) {
+                    if (wallX1.getType() == materialType || wallX2.getType() == materialType) {
                         wallX1.setType(Material.AIR);
                         wallX2.setType(Material.AIR);
                     }
-                    if (wallZ1.getType() == Material.OAK_FENCE || wallZ2.getType() == Material.OAK_FENCE) {
+                    if (wallZ1.getType() == materialType || wallZ2.getType() == materialType) {
                         wallZ1.setType(Material.AIR);
                         wallZ2.setType(Material.AIR);
                     }

@@ -1,8 +1,8 @@
 name: FirmaCore
-version: 1.0.0
+version: 0.0.1
 main: br.firmacore.Main
 author: F1rmeza
-api-version: 1.15
+api-version: 1.16
 depend:
   - WorldGuard
   - Vault

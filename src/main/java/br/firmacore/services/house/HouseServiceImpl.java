@@ -9,9 +9,7 @@ import br.firmacore.enums.PropertyType;
 import br.firmacore.hooks.VaultHook;
 import br.firmacore.hooks.exceptions.PlayerHasNoMoneyException;
 import br.firmacore.services.house.api.HouseService;
-import br.firmacore.services.property.api.PropertyService;
 import br.firmacore.services.property.exceptions.*;
-import br.firmacore.utils.MessageUtils;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
@@ -22,7 +20,6 @@ public class HouseServiceImpl implements HouseService {
     public static final int MAX_BLOCKS_MEMBER = 2500;
     public static final int MAX_BLOCKS_VIP = 10000;
     private final HouseRepository HOUSE_REPOSITORY;
-    private PropertyService propertyService;
 
     public HouseServiceImpl(Main plugin){
         HOUSE_REPOSITORY = new HouseRepository(plugin);

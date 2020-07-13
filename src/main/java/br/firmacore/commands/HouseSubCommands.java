@@ -1,6 +1,7 @@
 package br.firmacore.commands;
 
 import br.firmacore.Main;
+import br.firmacore.runnables.CommandAcceptRunnable;
 import br.firmacore.services.house.repository.model.House;
 import br.firmacore.enums.PropertyType;
 import br.firmacore.hooks.VaultHook;
@@ -16,12 +17,16 @@ import io.github.mrblobman.spigotcommandlib.SubCommandHandle;
 import io.github.mrblobman.spigotcommandlib.SubCommandHandler;
 import io.github.mrblobman.spigotcommandlib.args.ArgDescription;
 import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitTask;
 
 public class HouseSubCommands implements SubCommandHandler {
     private Main plugin;
     private HouseService houseService;
     private PropertyService propertyService;
+    private BukkitTask buyRunnable;
 
     public HouseSubCommands(Main plugin) {
         this.plugin = plugin;
@@ -29,8 +34,57 @@ public class HouseSubCommands implements SubCommandHandler {
         this.propertyService = plugin.getPropertyService();
     }
 
+    @SubCommandHandle(command = "confirmar", description = "Confirma a compra da casa")
+    private void confirmBuy(Player player){
+        try {
+            PropertyCreateVO propertyCreateVO = new PropertyCreateVO();
+            propertyCreateVO.setOwner(player);
+            propertyCreateVO.setWorld(player.getWorld());
+            propertyCreateVO.setX(player.getLocation().getBlockX());
+            propertyCreateVO.setZ(player.getLocation().getBlockZ());
+            ProtectedRegion demoRegion = this.propertyService.getProperty(player.getName(), PropertyType.DEMO);
+            int sizeX = this.propertyService.getPropertySizeX(demoRegion);
+            int sizeZ = this.propertyService.getPropertySizeZ(demoRegion);
+            double value = this.houseService.getSizeValue(sizeX, sizeZ);
+
+            this.buyRunnable.cancel();
+            this.propertyService.setupProperty(propertyCreateVO, PropertyType.CASA);
+            this.houseService.createHouse(player, player.getWorld(), sizeX, sizeZ);
+
+            PlayerUtils.spawnFirework(player);
+            VaultHook.getEconomy().withdrawPlayer(player, value);
+
+            MessageUtils.successMessageToPlayer(
+                    player,
+                    "Você adquiriu uma casa por &c" +
+                            VaultHook.getEconomy().format(value)
+            );
+        } catch (PropertyNotExistsException e) {
+            e.exceptionToPlayer(player);
+            e.printStackTrace();
+        } catch (PropertyLimitPerPlayerException e) {
+            e.exceptionToPlayer(player);
+            e.printStackTrace();
+        } catch (PropertyLimitSizeException e) {
+            e.exceptionToPlayer(player);
+            e.printStackTrace();
+        } catch (PropertyRatioRuleException e) {
+            e.exceptionToPlayer(player);
+            e.printStackTrace();
+        } catch (PropertyWorldEnvironmentException e) {
+            e.exceptionToPlayer(player);
+            e.printStackTrace();
+        } catch (PlayerHasNoMoneyException e) {
+            e.exceptionToPlayer(player);
+            e.printStackTrace();
+        }
+    }
+
     @SubCommandHandle(command = "comprar", description = "Compra uma casa")
-    private void buy(Player player, @ArgDescription(name = "Tamanho na orientação Leste-Oeste") int sizeX, @ArgDescription(name = "Tamanho na orientação Norte-Sul") int sizeZ) {
+    private void buy(
+            Player player,
+            @ArgDescription(name = "Tamanho X") int sizeX,
+            @ArgDescription(name = "Tamanho Z") int sizeZ) {
         double value = this.houseService.getSizeValue(sizeX, sizeZ);
         try {
             PropertyCreateVO propertyCreateVO = new PropertyCreateVO();
@@ -41,28 +95,18 @@ public class HouseSubCommands implements SubCommandHandler {
             propertyCreateVO.setX(player.getLocation().getBlockX());
             propertyCreateVO.setZ(player.getLocation().getBlockZ());
 
+            this.propertyService.createDemoProperty(propertyCreateVO, PropertyType.CASA, Material.DARK_OAK_FENCE);
 
-            this.houseService.createHouse(player, player.getWorld(), sizeX, sizeZ);
-            this.propertyService.createProperty(propertyCreateVO, PropertyType.CASA);
-
-            MessageUtils.successMessageToPlayer(
-                    player,
-                    "Você adquiriu uma casa por &c" +
-                            VaultHook.getEconomy().format(value)
+            this.buyRunnable = new CommandAcceptRunnable(player, this.propertyService).runTaskTimer(
+                    this.plugin,
+                    0,
+                    20
             );
-        } catch (PropertyLimitSizeException e) {
-            e.exceptionToPlayer(player);
-            e.printStackTrace();
+
+            String message = "Confirme a compra no valor de §c" + VaultHook.getEconomy().format(value);
+            PlayerUtils.sendJsonConfirmation(player, message,"/casa confirmar");
+            PlayerUtils.playSound(player, Sound.UI_TOAST_IN);
         } catch (PropertyLimitPerPlayerException e) {
-            e.exceptionToPlayer(player);
-            e.printStackTrace();
-        } catch (PropertyWorldEnvironmentException e) {
-            e.exceptionToPlayer(player);
-            e.printStackTrace();
-        } catch (PlayerHasNoMoneyException e) {
-            e.exceptionToPlayer(player);
-            e.printStackTrace();
-        }catch (PropertyRatioRuleException e) {
             e.exceptionToPlayer(player);
             e.printStackTrace();
         }
@@ -125,7 +169,7 @@ public class HouseSubCommands implements SubCommandHandler {
             int sizeZ = house.getSizeZ();
 
             MessageUtils.clearMessageToPlayer(player, "");
-            MessageUtils.informativeMessageToPlayer(player, "INFORMAÇÕES DA &8CASA &6DE " + owner);
+            MessageUtils.informativeMessageToPlayer(player, "&8CASA &7DE &3@" + owner.toUpperCase());
             MessageUtils.clearMessageToPlayer(player, "");
             MessageUtils.clearMessageToPlayer(player, "   &6● &7Proprietário: &3" + owner);
             MessageUtils.clearMessageToPlayer(player, "   &6● &7Tamanho X (orientação Leste-Oeste): &8" + sizeX);
@@ -144,7 +188,7 @@ public class HouseSubCommands implements SubCommandHandler {
             ProtectedRegion region = this.propertyService.getProperty(nickname, PropertyType.CASA);
             House house = this.houseService.getHouse(nickname);
 
-            this.propertyService.removeProperty(region, player.getWorld());
+            this.propertyService.removeProperty(region, player.getWorld(), Material.OAK_FENCE);
             this.houseService.removeHouse(house);
 
             MessageUtils.successMessageToPlayer(

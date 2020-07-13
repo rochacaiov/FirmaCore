@@ -22,6 +22,10 @@ public final class MessageUtils {
         sender.sendMessage(SUCCESS_TAG + color(message));
     }
 
+    public static void normalMessageToPlayer(Player sender, String message){
+        sender.sendMessage(SUCCESS_TAG + "§6" + color(message));
+    }
+
     public static void clearMessageToPlayer(Player sender, String message){
         sender.sendMessage(color(message));
     }
@@ -38,7 +42,7 @@ public final class MessageUtils {
         Bukkit.getLogger().info(INFO_TAG + color(message));
     }
 
-    private static String color(String linha){
+    public static String color(String linha){
         return ChatColor.translateAlternateColorCodes('&', linha);
     }
 }

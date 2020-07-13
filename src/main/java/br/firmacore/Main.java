@@ -55,7 +55,7 @@ public class Main extends JavaPlugin {
                 ChatColor.GOLD + " Firma" + ChatColor.RED + "CORE " +
                 ChatColor.WHITE + "v" + getDescription().getVersion() + "\n" +
                 ChatColor.GOLD + "|   "+ChatColor.RED+" \\__, \\__/ |  \\ |___ " +
-                ChatColor.DARK_GRAY + " Created By F1rmeza\n" +
+                ChatColor.DARK_GRAY + " Created By F1rmeza, Huryer....\n" +
                 ChatColor.GOLD + "                         \n");
         System.out.println(" » " + ChatColor.GREEN + "Plugin habilitado com sucesso!\n");
     }
